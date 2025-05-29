@@ -27,6 +27,11 @@ if ($needsInstall) {
     }
 
     New-Item -ItemType Directory -Force -Path $extractPath | Out-Null
+
+# === Always replace existing BGInfo files with latest from GitHub ===
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/ITWurks/BGInfo/main/Bginfo64.exe" -OutFile "$extractPath\BGInfo64.exe" -UseBasicParsing
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/ITWurks/BGInfo/main/ITWurks.bgi" -OutFile "$extractPath\ITWurks.bgi" -UseBasicParsing
+
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/ITWurks/BGInfo/main/Bginfo64.exe" -OutFile "$extractPath\BGInfo64.exe"
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/ITWurks/BGInfo/main/ITWurks.bgi" -OutFile "$extractPath\ITWurks.bgi"
 
