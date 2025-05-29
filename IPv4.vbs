@@ -5,9 +5,12 @@ For Each IPConfig in IPConfigSet
     IPAddresses = IPConfig.IPAddress
     If Not IsNull(IPAddresses) Then
         For Each IPAddress in IPAddresses
-            If InStr(IPAddress, ":") = 0 Then
-            Echo IPAddress
+            If InStr(IPAddress, ":") = 0 Then ' Ignore IPv6
+                WScript.Echo IPAddress
+                WScript.Quit ' Return only the first IPv4
+
             End If
         Next
     End If
 Next
+ 
