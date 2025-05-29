@@ -34,7 +34,7 @@ Invoke-WebRequest -Uri "https://raw.githubusercontent.com/ITWurks/BGInfo/main/IT
 
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/ITWurks/BGInfo/main/Bginfo64.exe" -OutFile "$extractPath\BGInfo64.exe"
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/ITWurks/BGInfo/main/ITWurks.bgi" -OutFile "$extractPath\ITWurks.bgi"
-
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/ITWurks/BGInfo/refs/heads/main/IPv4.vbs" -OutFile "C:\BGInfo\IPv4.vbs"
 
     # Write version flag
     Set-Content -Path $versionFile -Value $currentVersion
