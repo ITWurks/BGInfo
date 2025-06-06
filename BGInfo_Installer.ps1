@@ -1,30 +1,28 @@
-﻿# === Remove old scheduled task ===
+
+# === Remove old scheduled task ===
 Unregister-ScheduledTask -TaskName "BGInfo_Overlay" -Confirm:$false -ErrorAction SilentlyContinue
 
 # === Config ===
-$extractPath = "C:\\BGInfo"
-$versionFile = "$extractPath\\BGInfo.version"
-$currentVersion = "1.0"
+$extractPath = "C:\BGInfo"
+$taskName = "BGInfo_Overlay"
+$bginfoExe = "$extractPath\BGInfo64.exe"
+$bgiFile = "$extractPath\ITWurks.bgi"
+
+Write-Host "Installing or updating BGInfo..."
+Stop-Process -Name BGInfo -Force -ErrorAction SilentlyContinue
+
 $taskName = "BGInfo_Overlay"
 $bginfoExe = "$extractPath\\BGInfo64.exe"
 $bgiFile = "$extractPath\\ITWurks.bgi"
 
-# === Step 1: Check version ===
-$needsInstall = $true
-if ((Test-Path $bginfoExe) -and (Test-Path $versionFile)) {
-    $installedVersion = Get-Content $versionFile -ErrorAction SilentlyContinue
-    if ($installedVersion -eq $currentVersion) {
-        $needsInstall = $false
-    }
-}
+# === Always install/update on each run ===
 
-# === Step 2: Install/Update if needed ===
-if ($needsInstall) {
-    Write-Host "Installing or updating BGInfo..."
+    Write-Host "Installing or updating BGInfo...Stop-Process -Name BGInfo -Force -ErrorAction SilentlyContinue
+"
 
     # Remove old files
     if (Test-Path $extractPath) {
-    }
+    
 
     New-Item -ItemType Directory -Force -Path $extractPath | Out-Null
 
@@ -37,7 +35,6 @@ Invoke-WebRequest -Uri "https://raw.githubusercontent.com/ITWurks/BGInfo/main/IT
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/ITWurks/BGInfo/refs/heads/main/IPv4.vbs" -OutFile "C:\BGInfo\IPv4.vbs"
 
     # Write version flag
-    Set-Content -Path $versionFile -Value $currentVersion
 }
 
 # === Step 3: Register Scheduled Task (runs on user login) ===
@@ -48,8 +45,7 @@ if ((Test-Path $bginfoExe) -and (Test-Path $bgiFile)) {
     $task = New-ScheduledTask -Action $action -Trigger $trigger -Principal $principal -Description "Apply BGInfo overlay on login"
 
     # Register for all users (will overwrite if exists)
-    Register-ScheduledTask -TaskName $taskName -InputObject $task -Force
-    Write-Host "Scheduled task '$taskName' registered."
+        Write-Host "Scheduled task '$taskName' registered."
 } else {
     Write-Host "BGInfo files not found. Cannot register task."
 }
@@ -58,3 +54,29 @@ if ((Test-Path $bginfoExe) -and (Test-Path $bgiFile)) {
 if ((Test-Path $bginfoExe) -and (Test-Path $bgiFile)) {
     Start-Process -FilePath $bginfoExe -ArgumentList "`"$bgiFile`" /silent /nolicprompt /timer:0" -WindowStyle Hidden
 }
+
+# === Save this script to disk for persistence ===
+$scriptPath = "$extractPath\BGInfo_Installer.ps1"
+Copy-Item -Path $MyInvocation.MyCommand.Definition -Destination $scriptPath -Force
+
+# === Create trigger to run at logon ===
+$trigger = New-ScheduledTaskTrigger -AtLogOn
+
+# === Define action to run the saved script ===
+$action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-ExecutionPolicy Bypass -File `"$scriptPath`""
+
+# === Register scheduled task ===
+
+
+# === Save this script to disk for persistence ===
+$scriptPath = "$extractPath\BGInfo_Installer.ps1"
+Copy-Item -Path $MyInvocation.MyCommand.Definition -Destination $scriptPath -Force
+
+# === Create trigger to run at logon ===
+$trigger = New-ScheduledTaskTrigger -AtLogOn
+
+# === Define action to run the saved script ===
+$action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-ExecutionPolicy Bypass -File `"$scriptPath`""
+
+# === Register scheduled task ===
+Register-ScheduledTask -TaskName "BGInfo_Overlay" -Action $action -Trigger $trigger -RunLevel Highest -Force
