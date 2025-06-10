@@ -1,15 +1,18 @@
-Set WMIService = GetObject("winmgmts:\\.\root\cimv2")
-Set IPConfigSet = WMIService.ExecQuery("Select * from Win32_NetworkAdapterConfiguration Where IPEnabled=TRUE")
 
-For Each IPConfig in IPConfigSet
-    IPAddresses = IPConfig.IPAddress
-    If Not IsNull(IPAddresses) Then
-        For Each IPAddress in IPAddresses
-            If InStr(IPAddress, ":") = 0 Then ' Ignore IPv6
-                Echo IPAddress
-                Exit For
-            End If
-        Next
-        Exit For
-    End If
+strComputer = "."
+ 
+On Error Resume Next
+ 
+Set objWMIService = GetObject("winmgmts:" & "{impersonationLevel=impersonate}!\\" & strComputer & "\root\cimv2")
+ 
+Set colSettings = objWMIService.ExecQuery ("SELECT * FROM Win32_NetworkAdapterConfiguration where IPEnabled = 'True'")
+ 
+For Each objIP in colSettings
+ 
+   For i=LBound(objIP.IPAddress) to UBound(objIP.IPAddress)
+ 
+      If InStr(objIP.IPAddress(i),":") = 0 Then Echo objIP.IPAddress(i)
+ 
+   Next
+ 
 Next
